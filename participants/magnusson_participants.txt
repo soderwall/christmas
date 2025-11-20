@@ -1,0 +1,10 @@
+# Familjen Magnusson deltagare (ett namn per rad)
+# Redigera denna fil för att lägga till/ta bort deltagare
+
+Ida
+Philip
+Carina
+Tibbe
+Elin
+Jocke
+Sofie

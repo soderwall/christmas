@@ -1,0 +1,12 @@
+# Familjen Söderwall deltagare (ett namn per rad)
+# Redigera denna fil för att lägga till/ta bort deltagare
+
+Ida
+Philip
+Catarina
+Tobbe
+Eva
+Rune
+Julia
+Sefa
+Bobo

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎅 Secret Santa 🎄</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            background: linear-gradient(135deg, #0f4c3a 0%, #1a5d4a 50%, #0f4c3a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 { font-size: 3rem; margin-bottom: 1rem; }
+        p { font-size: 1.2rem; margin-bottom: 2rem; }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px;
+            background: #c41e3a;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(196, 30, 58, 0.3);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(196, 30, 58, 0.4);
+        }
+        .btn-secondary {
+            background: #2c5530;
+            box-shadow: 0 4px 15px rgba(44, 85, 48, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎅 Secret Santa 🎄</h1>
+        <p>Välj ditt Secret Santa-alternativ:</p>
+        
+        <a href="lookup.html" class="btn">
+            🔍 Se Min Tilldelning<br>
+            <small style="font-size: 0.8rem;">Hitta vem du ska ge present till</small>
+        </a>
+        
+        <div style="margin-top: 2rem; font-size: 0.9rem; opacity: 0.8;">
+            <p>🎁 Automatisk Århantering & Säker Uppslag 🎁</p>
+        </div>
+    </div>
+</body>
+</html>
