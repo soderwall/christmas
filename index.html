@@ -1,66 +1,95 @@
 <!DOCTYPE html>
 <html lang="sv">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎅 Secret Santa 🎄</title>
-    <style>
-        body {
-            font-family: Georgia, serif;
-            background: linear-gradient(135deg, #0f4c3a 0%, #1a5d4a 50%, #0f4c3a 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            color: white;
-        }
-        .container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 3rem;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-        h1 { font-size: 3rem; margin-bottom: 1rem; }
-        p { font-size: 1.2rem; margin-bottom: 2rem; }
-        .btn {
-            display: inline-block;
-            padding: 15px 30px;
-            margin: 10px;
-            background: #c41e3a;
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(196, 30, 58, 0.3);
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(196, 30, 58, 0.4);
-        }
-        .btn-secondary {
-            background: #2c5530;
-            box-shadow: 0 4px 15px rgba(44, 85, 48, 0.3);
-        }
-    </style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎅 Secret Santa Uppslag 🎄</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <div class="container">
-        <h1>🎅 Secret Santa 🎄</h1>
-        <p>Välj ditt Secret Santa-alternativ:</p>
-        
-        <a href="lookup.html" class="btn">
-            🔍 Se Min Tilldelning<br>
-            <small style="font-size: 0.8rem;">Hitta vem du ska ge present till</small>
-        </a>
-        
-        <div style="margin-top: 2rem; font-size: 0.9rem; opacity: 0.8;">
-            <p>🎁 Automatisk Århantering & Säker Uppslag 🎁</p>
-        </div>
+      <!-- Name Entry Screen (Initial) -->
+      <div id="name-entry-screen">
+        <header>
+            <h1>🎅 Secret Santa <span id="current-year"></span> 🎄</h1>
+            <p>Ange ditt namn för att se din tilldelning</p>
+        </header>
+
+        <main>
+          <section class="lookup-section">
+            <div class="card">
+              <h2>Vem är du?</h2>
+              <form id="lookup-form">
+                <div class="form-group">
+                  <label for="participant-name">Ditt namn:</label>
+                  <input
+                    type="text"
+                    id="participant-name"
+                    name="participant-name"
+                    required
+                    placeholder="Skriv ditt förnamn namn"
+                    autocomplete="off"
+                  />
+                  <div id="name-suggestions" class="name-suggestions"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  🎁 Se Min Tilldelning 🎁
+                </button>
+              </form>
+            </div>
+          </section>
+        </main>
+
+        <footer>
+          <p>🎁 Ha en underbar Jul! 🎁</p>
+        </footer>
+      </div>
+
+      <!-- Assignment Results Screen (Hidden initially) -->
+      <div id="results-screen" style="display: none">
+        <header>
+          <h1>🎅 Din Secret Santa Tilldelning 🎄</h1>
+          <p id="results-greeting"></p>
+        </header>
+
+        <main>
+          <section class="results-section">
+            <div class="card">
+              <div id="assignment-results" class="assignment-results"></div>
+              <div class="results-note">
+                <p>
+                  <strong>Kom ihåg:</strong> Detta är hemligt! Berätta inte för
+                  någon vem du ska ge present till.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section class="gift-tips-section">
+            <div class="card">
+              <h2>🎁 Presenttips & Budget</h2>
+              <div id="budget-info" class="budget-info">
+                <!-- Budget info will be populated by JavaScript based on assignments -->
+              </div>
+              <div class="gift-tips">
+                <p>• Tänk på personens intressen och hobbys</p>
+                <p>• Handgjorda presenter är alltid uppskattade</p>
+                <p>• Glöm inte presentpapper och kort!</p>
+                <p>
+                  • Fråga familjemedlemmar om tips (utan att avslöja vem du
+                  köper till)
+                </p>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <footer>
+          <p>🎁 Lycka till med presentköpet! 🎁</p>
+        </footer>
+      </div>
     </div>
-</body>
+
+    <script src="lookup-script.js"></script>
+  </body>
 </html>
