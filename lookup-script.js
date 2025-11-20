@@ -227,13 +227,20 @@ class SecretSantaLookup {
 
     showResultsScreen(searchName, results) {
         const nameEntryScreen = document.getElementById('name-entry-screen');
+        const christmasLoadingScreen = document.getElementById('christmas-loading-screen');
         const resultsScreen = document.getElementById('results-screen');
         const resultsGreeting = document.getElementById('results-greeting');
         const assignmentResults = document.getElementById('assignment-results');
         
-        // Hide name entry screen and show results screen
+        // Show Christmas loading animation first
         nameEntryScreen.style.display = 'none';
-        resultsScreen.style.display = 'block';
+        christmasLoadingScreen.style.display = 'block';
+        this.startChristmasAnimation();
+        
+        // After animation completes, show results
+        setTimeout(() => {
+            christmasLoadingScreen.style.display = 'none';
+            resultsScreen.style.display = 'block';
         
         // Set greeting
         resultsGreeting.textContent = `Hej ${searchName}! Här är din Secret Santa-tilldelning:`;
@@ -258,12 +265,46 @@ class SecretSantaLookup {
             `;
         });
 
-        assignmentResults.innerHTML = html;
-        this.updateBudgetInfo(results);
-        this.hideNameSuggestions();
+            assignmentResults.innerHTML = html;
+            this.updateBudgetInfo(results);
+            this.hideNameSuggestions();
+            
+            // Scroll to top of results screen
+            resultsScreen.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 3000); // Show animation for 3 seconds
+    }
+
+    startChristmasAnimation() {
+        // Create snowflakes
+        this.createSnowflakes();
         
-        // Scroll to top of results screen
-        resultsScreen.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Start present bounce animation
+        const presents = document.querySelectorAll('.present');
+        presents.forEach((present, index) => {
+            setTimeout(() => {
+                present.style.animation = 'bounce 1s ease-in-out infinite';
+            }, index * 300);
+        });
+    }
+
+    createSnowflakes() {
+        const snowContainer = document.querySelector('.snow-container');
+        if (!snowContainer) return;
+        
+        // Clear existing snowflakes
+        snowContainer.innerHTML = '';
+        
+        // Create 50 snowflakes
+        for (let i = 0; i < 50; i++) {
+            const snowflake = document.createElement('div');
+            snowflake.className = 'snowflake';
+            snowflake.innerHTML = ['❄️', '❅', '❆'][Math.floor(Math.random() * 3)];
+            snowflake.style.left = Math.random() * 100 + '%';
+            snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            snowflake.style.animationDelay = Math.random() * 2 + 's';
+            snowflake.style.fontSize = (Math.random() * 0.8 + 0.8) + 'rem';
+            snowContainer.appendChild(snowflake);
+        }
     }
 
     updateBudgetInfo(results) {

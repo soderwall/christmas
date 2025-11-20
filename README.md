@@ -1,58 +1,57 @@
 # 🎅 Secret Santa Web Application 🎄
 
-En dynamisk Secret Santa-applikation för två familjer med automatisk århantering och säker, privat uppslagsfunktion.
+A dynamic Secret Santa application for two families with automatic year handling and secure, private lookup functionality. **Note: The web interface is in Swedish.**
 
-## ✨ Funktioner
+## ✨ Features
 
-- **🗓️ Automatisk århantering** - Systemet detekterar automatiskt aktuellt år
-- **🏠 Tvåfamiljs-support** - Hanterar Familjen Magnusson & Familjen Söderwall
-- **💰 Olika budgetar** - 600 kr (Magnusson) / 700 kr (Söderwall) 
-- **🔒 Säker uppslag** - Privat tvåstegs-process, ingen snooping möjlig
-- **📱 Mobilanpassad** - Fungerar perfekt på alla enheter
-- **🛠️ Bash-skript** - Automatiserad dragning med en kommando
+- **🗓️ Automatic year handling** - System automatically detects current year
+- **🏠 Two-family support** - Handles Magnusson Family & Söderwall Family  
+- **💰 Different budgets** - 600 SEK (Magnusson) / 700 SEK (Söderwall)
+- **🔒 Secure lookup** - Private lookup process, no snooping possible
+- **📱 Mobile-responsive** - Works perfectly on all devices
+- **🛠️ Bash scripts** - Automated drawing with one command
 
-## 🚀 Snabbstart
+## 🚀 Quick Start
 
-### För Deltagare
-1. **Starta webbservern:**
+### For Participants
+1. **Start the web server:**
    ```bash
    ./start-server.sh
    ```
 
-2. **Slå upp din tilldelning:**
-   - Ange ditt namn på webbsidan som öppnas
-   - Se vem du ska ge present till
-   - Få budgetinformation automatiskt
+2. **Look up your assignment:**
+   - Enter your name on the webpage that opens
+   - See who you should give a gift to
+   - Get budget information automatically
 
-### För Administratörer (Philip)
-1. **Uppdatera deltagarlistor:**
+### For Administrators (Philip)
+1. **Update participant lists:**
    ```bash
-   # Redigera deltagarfiler efter behov
+   # Edit participant files as needed
    nano participants/magnusson_participants.txt
    nano participants/soderwall_participants.txt
    ```
 
-2. **Gör ny dragning:**
+2. **Generate new draw:**
    ```bash
    ./generate-draw.sh
    ```
 
-3. **Meddela familjen** att dragningen är klar!
+3. **Notify the family** that the draw is ready!
 
-## 📁 Projektstruktur
+## 📁 Project Structure
 
 ```
 /
-├── 📄 index.html                  # Startsida
-├── 🔍 lookup.html                # Uppslagssida
-├── 📜 lookup-script.js            # Applikationslogik
+├── 📄 index.html                  # Main page with lookup functionality
+├── 📜 lookup-script.js            # Application logic
 ├── 🎨 styles.css                  # Styling
-├── 🔧 generate-draw.sh            # Dragningsskript
-├── 🌐 start-server.sh             # Webbserver-starter
-├── 📋 participants/               # Deltagarlistor
+├── 🔧 generate-draw.sh            # Drawing script
+├── 🌐 start-server.sh             # Web server starter
+├── 📋 participants/               # Participant lists
 │   ├── magnusson_participants.txt
 │   └── soderwall_participants.txt
-└── 🗂️ families/                   # Dragningar per år
+└── 🗂️ families/                   # Draws per year
     ├── 2024/
     │   ├── magnusson.csv
     │   └── soderwall.csv
@@ -61,135 +60,136 @@ En dynamisk Secret Santa-applikation för två familjer med automatisk århanter
         └── soderwall.csv
 ```
 
-## 💡 Så Här Fungerar Det
+## 💡 How It Works
 
-### Automatisk Århantering
-- **2025**: Systemet letar automatiskt efter `families/2025/*.csv`
-- **2026**: Nästa år letar systemet efter `families/2026/*.csv` 
-- **Ingen data**: Visar "Kontakta Philip" meddelande
+### Automatic Year Handling
+- **2025**: System automatically looks for `families/2025/*.csv`
+- **2026**: Next year system looks for `families/2026/*.csv` 
+- **No data**: Shows "Contact Philip" message
 
-### Säker Uppslag
-- **Steg 1**: Ange namn (ingen autokomplettering synlig för andra)
-- **Steg 2**: Privat resultatskärm med tilldelningar
-- **Säkerhet**: Ingen "slå upp annan person" knapp, bakåt-knapp blockerad
+### Secure Lookup
+- **Direct entry**: Users land directly on the name entry screen
+- **Private results**: Private result screen with assignments
+- **Security**: No "look up another person" button, back button behavior controlled
 
-### Smart Budgethantering
-- **En familj**: Visar relevant budget (600kr eller 700kr)
-- **Båda familjer**: Visar båda budgetar + totalsumma (1300kr)
+### Smart Budget Handling
+- **One family**: Shows relevant budget (600 SEK or 700 SEK)
+- **Both families**: Shows both budgets + total sum (1300 SEK)
 
-## 🔧 Skript & Kommandon
+## 🔧 Scripts & Commands
 
-### Dragningsskript
+### Drawing Script
 ```bash
 ./generate-draw.sh
 ```
-- Läser från `participants/*.txt`
-- Skapar slumpmässiga cirkulära tilldelningar
-- Genererar `families/[ÅR]/*.csv` med budgetinfo
-- Garanterar att ingen får sig själv
+- Reads from `participants/*.txt`
+- Creates random circular assignments
+- Generates `families/[YEAR]/*.csv` with budget info
+- Guarantees no one gets themselves
 
-### Webbserver
+### Web Server
 ```bash
 ./start-server.sh
 ```
-- Startar HTTP-server (löser CORS-problem)
-- Öppnar webbsida automatiskt
-- Stoppa med Ctrl+C
+- Starts HTTP server (solves CORS issues)
+- Opens webpage automatically
+- Stop with Ctrl+C
 
-### Test av "Ingen Dragning"
+### Test "No Draw" Scenario
 ```bash
 ./test-no-draw.sh
 ```
-- Tar bort aktuellt års data tillfälligt
-- Testa "Kontakta Philip" meddelandet
+- Temporarily removes current year's data
+- Test "Contact Philip" message
 
-## 📋 Årlig Checklista
+## 📋 Annual Checklist
 
-1. **📝 Uppdatera deltagare**
-   - [ ] Redigera `participants/magnusson_participants.txt`
-   - [ ] Redigera `participants/soderwall_participants.txt`
+1. **📝 Update participants**
+   - [ ] Edit `participants/magnusson_participants.txt`
+   - [ ] Edit `participants/soderwall_participants.txt`
 
-2. **🎲 Gör dragning**
-   - [ ] Kör `./generate-draw.sh`
-   - [ ] Verifiera att CSV-filer skapades
+2. **🎲 Generate draw**
+   - [ ] Run `./generate-draw.sh`
+   - [ ] Verify CSV files were created
 
-3. **🧪 Testa systemet**
-   - [ ] Kör `./start-server.sh`
-   - [ ] Prova att slå upp några namn
-   - [ ] Kontrollera budgetinformation
+3. **🧪 Test system**
+   - [ ] Run `./start-server.sh`
+   - [ ] Try looking up some names
+   - [ ] Check budget information
 
-4. **📢 Meddela familjen**
-   - [ ] Skicka länk eller instruktioner
-   - [ ] Påminn om att köra via webbserver (inte öppna HTML direkt)
+4. **📢 Notify family**
+   - [ ] Send link or instructions
+   - [ ] Remind to run via web server (not open HTML directly)
 
 ## 🌐 Hosting & Deployment
 
-### Lokalt (Utveckling/Test)
+### Local (Development/Test)
 ```bash
 ./start-server.sh
-# Öppnar: http://localhost:8081
+# Opens: http://localhost:8081
 ```
 
 ### GitHub Pages
-1. Pusha till GitHub repository
-2. Aktivera GitHub Pages i inställningar
-3. Webbsida blir tillgänglig på: `https://[username].github.io/[repo-name]`
+1. Push to GitHub repository
+2. Enable GitHub Pages in settings
+3. Website becomes available at: `https://[username].github.io/[repo-name]`
 
-### Annan Webbhost
-- Ladda upp alla filer till webbserver
-- Ingen speciell konfiguration krävs
-- Fungerar på alla statiska webbhotell
+### Other Web Host
+- Upload all files to web server
+- No special configuration required
+- Works on any static web host
 
-## 🛠️ Teknisk Information
+## 🛠️ Technical Information
 
-- **Språk**: HTML, CSS, JavaScript (vanilla, inga ramverk)
-- **Backend**: Ingen - helt statisk
-- **Säkerhet**: Client-side endast, inga externa anrop
-- **Kompatibilitet**: Alla moderna webbläsare
-- **Mobile-first**: Responsiv design
+- **Languages**: HTML, CSS, JavaScript (vanilla, no frameworks)
+- **Backend**: None - completely static
+- **Security**: Client-side only, no external calls
+- **Compatibility**: All modern browsers
+- **Mobile-first**: Responsive design
+- **Interface Language**: Swedish
 
-## 🔒 Säkerhet & Integritet
+## 🔒 Security & Privacy
 
-- ✅ **Lokala data**: Allt stannar i webbläsaren
-- ✅ **Inga externa anrop**: Ingen data skickas någonstans
-- ✅ **Privat uppslag**: Varje person ser bara sin egen tilldelning
-- ✅ **Årsseparation**: Gamla år påverkas inte av nya dragningar
-- ✅ **Offline-kapabel**: Fungerar utan internet efter första laddning
+- ✅ **Local data**: Everything stays in the browser
+- ✅ **No external calls**: No data sent anywhere
+- ✅ **Private lookup**: Each person only sees their own assignment
+- ✅ **Year separation**: Old years not affected by new draws
+- ✅ **Offline capable**: Works without internet after first load
 
-## 🐛 Felsökning
+## 🐛 Troubleshooting
 
-**Problem: "Philip hittades inte i familjelistan"**
+**Problem: "Philip not found in family list" (or similar lookup errors)**
 ```bash
-# Lösning: Använd webbserver istället för att öppna HTML-filen direkt
+# Solution: Use web server instead of opening HTML file directly
 ./start-server.sh
 ```
 
-**Problem: "Ingen dragning gjord än"**
+**Problem: "No draw done yet"**
 ```bash
-# Lösning: Skapa årets dragning
+# Solution: Generate this year's draw
 ./generate-draw.sh
 ```
 
-**Problem: Skript kan inte köras**
+**Problem: Scripts cannot be executed**
 ```bash
-# Lösning: Gör skript körbara
+# Solution: Make scripts executable
 chmod +x *.sh
 ```
 
-## 📊 Exempel på Användning
+## 📊 Usage Example
 
 ```bash
-# Sätt upp för 2025
-nano participants/magnusson_participants.txt  # Lägg till/ta bort namn
-./generate-draw.sh                            # Gör dragning
-./start-server.sh                             # Starta webbsida
+# Set up for 2025
+nano participants/magnusson_participants.txt  # Add/remove names
+./generate-draw.sh                            # Generate draw
+./start-server.sh                             # Start website
 
-# År 2026 - systemet är redan redo!
-./generate-draw.sh                            # Skapar automatiskt families/2026/
+# Year 2026 - system is already ready!
+./generate-draw.sh                            # Automatically creates families/2026/
 ```
 
 ---
 
-🎄 **God Jul och trevlig Secret Santa!** 🎅
+🎄 **Merry Christmas and Happy Secret Santa!** 🎅
 
-*Utvecklad med kärlek för familjen Magnusson & Söderwall* ❤️
+*Developed with love for the Magnusson & Söderwall families* ❤️
