@@ -225,7 +225,7 @@
   </section>
 </main>
 <button id="music" type="button" aria-label="Musik av/på" title="Musik av/på">🔇</button>
-<audio id="song" src="jul.mp3" loop preload="none"></audio>
+<audio id="song" src="jul.mp3" loop preload="auto"></audio>
 <footer>Gjord med 🍪, glögg och lite magi ✨<br /><small>Musik: "Holiday Weasel" av Kevin MacLeod (incompetech.com), <a href="https://creativecommons.org/licenses/by/4.0/" style="color:inherit" target="_blank" rel="noopener">CC BY 4.0</a></small></footer>
 
 <!--
@@ -468,76 +468,33 @@
     t.textContent = tips[ti = (ti + 1) % tips.length]; burst(15);
   });
 
-  /* ---------- music: jul.mp3 if present, otherwise a built-in music-box "Bjällerklang" ---------- */
+  /* ---------- music: jul.mp3 ("Holiday Weasel" by Kevin MacLeod) ---------- */
   (function () {
-    var au = $('song'), btn = $('music'), want = true, started = false, useSynth = false, synthOn = false;
+    var au = $('song'), btn = $('music'), want = true, started = false;
     try { want = localStorage.getItem('santa-music') !== 'off'; } catch (e) {}
     au.volume = .45;
-    var AC = window.AudioContext || window.webkitAudioContext;
-
-    // Bjällerklang (Jingle Bells, trad./PD). [frequency Hz, beats]
-    var C = 523.25, D = 587.33, E = 659.25, F = 698.46, G = 783.99;
-    var verse = [[E,1],[E,1],[E,2],[E,1],[E,1],[E,2],[E,1],[G,1],[C,1.5],[D,.5],[E,4],
-                 [F,1],[F,1],[F,1.5],[F,.5],[F,1],[E,1],[E,1],[E,.5],[E,.5]];
-    var song = verse.concat([[E,1],[D,1],[D,1],[E,1],[D,2],[G,2]], verse.slice(0, 11),
-                 [[F,1],[F,1],[F,1.5],[F,.5],[F,1],[E,1],[E,1],[E,.5],[E,.5],[G,1],[G,1],[F,1],[D,1],[C,4]]);
-    var BEAT = .4, ctx = null, master = null, timer = 0;
-
-    function note(t, f, beats) {
-      [[1, .55], [2, .22], [3, .08]].forEach(function (h) {
-        var o = ctx.createOscillator(), g = ctx.createGain();
-        o.type = 'sine'; o.frequency.value = f * h[0];
-        g.gain.setValueAtTime(0.0001, t);
-        g.gain.exponentialRampToValueAtTime(h[1], t + .01);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(.5, beats * BEAT * 1.8));
-        o.connect(g); g.connect(master); o.start(t); o.stop(t + beats * BEAT * 1.8 + .6);
-      });
-    }
-    function loop() {
-      master = ctx.createGain(); master.gain.value = .22; master.connect(ctx.destination);
-      var t = ctx.currentTime + .08, total = 0;
-      song.forEach(function (n) { note(t + total * BEAT, n[0], n[1]); total += n[1]; });
-      timer = setTimeout(loop, (total * BEAT + 1.2) * 1000);
-    }
-    function startSynth() {
-      if (!AC) return;
-      if (!ctx) ctx = new AC();
-      if (ctx.state === 'suspended') ctx.resume();
-      if (synthOn) return; synthOn = true; loop(); sync();
-    }
-    function stopSynth() { synthOn = false; clearTimeout(timer); try { master.disconnect(); } catch (e) {} sync(); }
-
-    function playing() { return useSynth ? synthOn : !au.paused; }
-    function sync() { var on = playing(); btn.textContent = on ? '🔊' : '🔇'; btn.classList.toggle('on', on); }
-    function play() { if (useSynth) startSynth(); else { var p = au.play(); if (p && p.then) p.then(sync, sync); } }
-    function pause() { if (useSynth) stopSynth(); else { au.pause(); sync(); } }
-
-    // No jul.mp3 (or it can't load)? Use the built-in melody instead.
-    au.addEventListener('error', function () { useSynth = !!AC; if (useSynth) btn.classList.add('ready'); });
-    au.addEventListener('canplay', function () { useSynth = false; btn.classList.add('ready'); });
+    function sync() { var on = !au.paused; btn.textContent = on ? '🔊' : '🔇'; btn.classList.toggle('on', on); }
     au.addEventListener('play', sync); au.addEventListener('pause', sync);
-    au.load();
-
-    // Try to start right away. Browsers often refuse until the visitor has interacted,
-    // so we also start on the very first tap, touch or key press (typing the name counts).
-    function kick() { if (want && btn.classList.contains('ready') && !started) { started = true; play(); } }
     au.addEventListener('canplay', function () {
-      if (!want || started || useSynth) return;
-      var p = au.play();
-      if (p && p.then) p.then(function () { started = true; sync(); }, function () { /* blocked, wait for a gesture */ });
+      btn.classList.add('ready');
+      if (!want || started) return;
+      var p = au.play();   // works if the browser allows autoplay; otherwise we wait for a gesture
+      if (p && p.then) p.then(function () { started = true; sync(); }, function () {});
     });
+    // Browsers often block sound until the visitor interacts: start on the first tap/touch/key.
     var evs = ['pointerdown', 'keydown', 'touchstart'];
     function first(e) {
       if (e.target === btn) return;
       evs.forEach(function (n) { document.removeEventListener(n, first, true); });
-      kick();
+      if (want && !started) { started = true; var p = au.play(); if (p && p.then) p.then(sync, function () { started = false; }); }
     }
     evs.forEach(function (n) { document.addEventListener(n, first, true); });
     btn.addEventListener('click', function () {
       started = true;
-      if (!playing()) { want = true; play(); } else { want = false; pause(); }
+      if (au.paused) { want = true; au.play(); } else { want = false; au.pause(); }
       try { localStorage.setItem('santa-music', want ? 'on' : 'off'); } catch (e) {}
     });
+    au.load();
   })();
 
   /* ---------- lights ---------- */

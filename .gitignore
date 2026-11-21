@@ -32,3 +32,4 @@ __pycache__/
 # Personal secret links (never commit)
 links.txt
 .playwright-mcp/
+meddelanden.txt
