@@ -471,7 +471,8 @@
   /* ---------- music: jul.mp3 ("Holiday Weasel" by Kevin MacLeod) ---------- */
   (function () {
     var au = $('song'), btn = $('music'), want = true, started = false;
-    try { want = localStorage.getItem('santa-music') !== 'off'; } catch (e) {}
+    // An explicit "off" only lasts for this visit; next time the music starts again on the first interaction.
+    try { want = sessionStorage.getItem('santa-music') !== 'off'; localStorage.removeItem('santa-music'); } catch (e) {}
     au.volume = .45;
     function sync() { var on = !au.paused; btn.textContent = on ? '🔊' : '🔇'; btn.classList.toggle('on', on); }
     au.addEventListener('play', sync); au.addEventListener('pause', sync);
@@ -498,7 +499,7 @@
     btn.addEventListener('click', function () {
       started = true;
       if (au.paused) { want = true; au.play(); } else { want = false; au.pause(); }
-      try { localStorage.setItem('santa-music', want ? 'on' : 'off'); } catch (e) {}
+      try { sessionStorage.setItem('santa-music', want ? 'on' : 'off'); } catch (e) {}
     });
     au.load();
   })();
