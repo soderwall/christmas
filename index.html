@@ -225,7 +225,10 @@
   </section>
 </main>
 <button id="music" type="button" aria-label="Musik av/på" title="Musik av/på">🔇</button>
-<audio id="song" src="jul.mp3" loop preload="auto"></audio>
+<audio id="song" loop preload="auto" playsinline>
+  <source src="jul.m4a" type="audio/mp4" />
+  <source src="jul.mp3" type="audio/mpeg" />
+</audio>
 <footer>Gjord med 🍪, glögg och lite magi ✨<br /><small>Musik: "Holiday Weasel" av Kevin MacLeod (incompetech.com), <a href="https://creativecommons.org/licenses/by/4.0/" style="color:inherit" target="_blank" rel="noopener">CC BY 4.0</a></small></footer>
 
 <!--
@@ -478,7 +481,6 @@
     au.addEventListener('play', sync); au.addEventListener('pause', sync);
     // Show the button right away (iPhone doesn't preload audio, so 'canplay' may never fire before a tap).
     btn.classList.add('ready');
-    au.addEventListener('error', function () { btn.classList.remove('ready'); });
     au.addEventListener('canplay', function () {
       if (!want || started) return;
       var p = au.play();   // works if the browser allows autoplay; otherwise we wait for a gesture

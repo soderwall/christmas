@@ -24,6 +24,6 @@ The word is one short Christmas word, so it stops casual peeking but is not stro
 
 ## Music
 
-`jul.mp3` plays when the page opens (browsers may wait for a first tap or key). It's "Holiday Weasel" by Kevin MacLeod (incompetech.com), licensed CC BY 4.0, credited in the page footer. Without `jul.mp3` there is simply no music button.
+`jul.m4a` (iPhone-friendly, with `jul.mp3` as backup) plays when the page opens (browsers may wait for a first tap or key). It's "Holiday Weasel" by Kevin MacLeod (incompetech.com), licensed CC BY 4.0, credited in the page footer. Both files are the same song.
 
 `families/` holds old draws for reference and is not used by the page.
