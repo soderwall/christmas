@@ -481,12 +481,16 @@
       var p = au.play();   // works if the browser allows autoplay; otherwise we wait for a gesture
       if (p && p.then) p.then(function () { started = true; sync(); }, function () {});
     });
-    // Browsers often block sound until the visitor interacts: start on the first tap/touch/key.
-    var evs = ['pointerdown', 'keydown', 'touchstart'];
+    // Chrome/Safari block sound until the visitor has interacted. Keep trying on every tap, click
+    // and key press until playback actually starts (only some events count as a real "gesture").
+    var evs = ['pointerdown', 'pointerup', 'click', 'touchend', 'keydown'];
     function first(e) {
-      if (e.target === btn) return;
-      evs.forEach(function (n) { document.removeEventListener(n, first, true); });
-      if (want && !started) { started = true; var p = au.play(); if (p && p.then) p.then(sync, function () { started = false; }); }
+      if (e.target === btn || started || !want) return;
+      var p = au.play();
+      if (p && p.then) p.then(function () {
+        started = true; sync();
+        evs.forEach(function (n) { document.removeEventListener(n, first, true); });
+      }, function () { /* not allowed yet, try again on the next gesture */ });
     }
     evs.forEach(function (n) { document.addEventListener(n, first, true); });
     btn.addEventListener('click', function () {
