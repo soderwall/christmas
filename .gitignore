@@ -29,3 +29,6 @@ __pycache__/
 # Backup files
 *.bak
 *.backup
+# Personal secret links (never commit)
+links.txt
+.playwright-mcp/

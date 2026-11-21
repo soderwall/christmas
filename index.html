@@ -1,120 +1,626 @@
 <!DOCTYPE html>
 <html lang="sv">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🎅 Secret Santa Uppslag 🎄</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="container">
-      <!-- Name Entry Screen (Initial) -->
-      <div id="name-entry-screen">
-        <header>
-            <h1>🎅 Secret Santa <span id="current-year"></span> 🎄</h1>
-            <p>Ange ditt namn för att se din tilldelning</p>
-        </header>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>🎅 Secret Santa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --red: #e63946; --red-dark: #b3202d; --green: #2a9d5c; --gold: #ffd166;
+    --night: #14213d; --night2: #2b1b5a; --ink: #1d2540; --pink: #ff8fab; --blue: #3b82f6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; }
+  body {
+    font-family: 'Fredoka', ui-rounded, 'SF Pro Rounded', 'Nunito', system-ui, sans-serif;
+    color: #fff; overflow-x: hidden; -webkit-tap-highlight-color: transparent;
+    background: linear-gradient(160deg, var(--night), var(--night2), #6a1b4d, var(--night2), var(--night));
+    background-size: 300% 300%; animation: sky 24s ease-in-out infinite;
+  }
+  @keyframes sky { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #snow { z-index: 0; } #confetti { z-index: 60; }
 
-        <main>
-          <section class="lookup-section">
-            <div class="card">
-              <h2>Vem är du?</h2>
-              <form id="lookup-form">
-                <div class="form-group">
-                  <label for="participant-name">Ditt namn:</label>
-                  <input
-                    type="text"
-                    id="participant-name"
-                    name="participant-name"
-                    required
-                    placeholder="Skriv ditt förnamn namn"
-                    autocomplete="off"
-                  />
-                  <div id="name-suggestions" class="name-suggestions"></div>
-                </div>
-                <button type="submit" class="btn btn-primary">
-                  🎁 Se Min Tilldelning 🎁
-                </button>
-              </form>
-            </div>
-          </section>
-        </main>
+  /* aurora blobs */
+  .blob { position: fixed; border-radius: 50%; filter: blur(70px); opacity: .35; z-index: 0; pointer-events: none; animation: drift 16s ease-in-out infinite alternate; }
+  .b1 { width: 340px; height: 340px; background: #22d3ee; top: 8%; left: -80px; }
+  .b2 { width: 380px; height: 380px; background: #f472b6; bottom: 4%; right: -100px; animation-delay: -6s; }
+  .b3 { width: 260px; height: 260px; background: #a3e635; top: 45%; left: 55%; opacity: .18; animation-delay: -11s; }
+  @keyframes drift { to { transform: translate(60px, -50px) scale(1.2); } }
 
-        <footer>
-          <p>🎁 Ha en underbar Jul! 🎁</p>
-        </footer>
-      </div>
+  /* floaties */
+  #floaties { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+  .floaty { position: absolute; bottom: -60px; font-size: 2rem; opacity: .85; animation: floatup linear infinite; }
+  @keyframes floatup {
+    0% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(30px, -55vh) rotate(25deg); }
+    100% { transform: translate(-20px, -115vh) rotate(-20deg); }
+  }
+  .sleigh { position: fixed; top: 14%; left: -260px; z-index: 3; font-size: 2.4rem; white-space: nowrap; pointer-events: none; }
+  .sleigh.go { animation: fly 7s linear forwards; }
+  @keyframes fly { 0% { transform: translate(0, 0) rotate(4deg); } 50% { transform: translate(60vw, -30px) rotate(-3deg); } 100% { transform: translate(120vw, 20px) rotate(4deg); } }
 
-      <!-- Christmas Loading Animation (Hidden initially) -->
-      <div id="christmas-loading-screen" style="display: none">
-        <div class="christmas-animation">
-          <div class="snow-container"></div>
-          <div class="santa-sleigh">
-            <div class="sleigh">🛷</div>
-            <div class="reindeer">🦌</div>
-          </div>
-          <div class="christmas-tree">🎄</div>
-          <div class="loading-message">
-            <h2>🎅 Förbereder din Secret Santa-tilldelning... 🎄</h2>
-            <div class="loading-dots">
-              <span>.</span>
-              <span>.</span>
-              <span>.</span>
-            </div>
-          </div>
-          <div class="presents">
-            <div class="present present-1">🎁</div>
-            <div class="present present-2">🎁</div>
-            <div class="present present-3">🎁</div>
-          </div>
-        </div>
-      </div>
+  /* lights */
+  .lights { position: fixed; top: 0; left: 0; right: 0; height: 34px; z-index: 5; display: flex; justify-content: space-around; pointer-events: none; }
+  .lights span { width: 14px; height: 20px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; margin-top: 8px; animation: twinkle 1.6s infinite ease-in-out; box-shadow: 0 0 14px 4px currentColor; background: currentColor; position: relative; }
+  .lights span::before { content: ''; position: absolute; top: -8px; left: 50%; width: 6px; height: 8px; background: #444; transform: translateX(-50%); border-radius: 2px; }
+  .lights span:nth-child(4n+1) { color: #ff4d5e; } .lights span:nth-child(4n+2) { color: #ffd166; animation-delay: .4s; }
+  .lights span:nth-child(4n+3) { color: #4ade80; animation-delay: .8s; } .lights span:nth-child(4n+4) { color: #60a5fa; animation-delay: 1.2s; }
+  @keyframes twinkle { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .3; transform: scale(.8); } }
 
-      <!-- Assignment Results Screen (Hidden initially) -->
-      <div id="results-screen" style="display: none">
-        <header>
-          <h1>🎅 Din Secret Santa Tilldelning 🎄</h1>
-          <p id="results-greeting"></p>
-        </header>
+  main { position: relative; z-index: 2; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 16px 20px; max-width: 640px; margin: 0 auto; text-align: center; }
+  .screen { display: none; width: 100%; }
+  .screen.active { display: block; animation: pop .55s cubic-bezier(.2,1.5,.4,1); }
+  @keyframes pop { from { opacity: 0; transform: scale(.8) translateY(30px) rotate(-3deg); } to { opacity: 1; transform: none; } }
 
-        <main>
-          <section class="results-section">
-            <div class="card">
-              <div id="assignment-results" class="assignment-results"></div>
-              <div class="results-note">
-                <p>
-                  <strong>Kom ihåg:</strong> Detta är hemligt! Berätta inte för
-                  någon vem du ska ge present till.
-                </p>
-              </div>
-            </div>
-          </section>
+  /* mascot */
+  .mascot { position: relative; display: inline-block; cursor: pointer; user-select: none; }
+  .santa { font-size: 5rem; display: inline-block; animation: wobble 2.4s infinite ease-in-out; transform-origin: 50% 90%; filter: drop-shadow(0 10px 8px rgba(0,0,0,.35)); }
+  .santa.hop { animation: hop .6s; }
+  @keyframes wobble { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg) translateY(-8px); } }
+  @keyframes hop { 30% { transform: translateY(-40px) scale(1.2, .9) rotate(10deg); } 60% { transform: translateY(0) scale(.9, 1.1); } }
+  .bubble {
+    position: relative; background: #fff; color: var(--ink); font-weight: 600; padding: 10px 16px; border-radius: 20px; margin: 0 auto 14px; max-width: 360px;
+    box-shadow: 0 6px 0 rgba(0,0,0,.18); animation: bob 3s ease-in-out infinite;
+  }
+  .bubble::after { content: ''; position: absolute; left: 50%; bottom: -12px; margin-left: -12px; border: 12px solid transparent; border-top-color: #fff; border-bottom: 0; }
+  @keyframes bob { 50% { transform: translateY(-5px) rotate(.6deg); } }
 
-          <section class="gift-tips-section">
-            <div class="card">
-              <h2>🎁 Presenttips & Budget</h2>
-              <div id="budget-info" class="budget-info">
-                <!-- Budget info will be populated by JavaScript based on assignments -->
-              </div>
-              <div class="gift-tips">
-                <p>• Tänk på personens intressen och hobbys</p>
-                <p>• Handgjorda presenter är alltid uppskattade</p>
-                <p>• Glöm inte presentpapper och kort!</p>
-                <p>
-                  • Fråga familjemedlemmar om tips (utan att avslöja vem du
-                  köper till)
-                </p>
-              </div>
-            </div>
-          </section>
-        </main>
+  h1 { font-size: clamp(2.3rem, 10vw, 3.6rem); line-height: 1.1; font-weight: 700; margin: 6px 0 18px; }
+  h1 .l { display: inline-block; animation: jump 2.2s infinite ease-in-out; text-shadow: 0 4px 0 rgba(0,0,0,.35); }
+  h1 .sp { display: inline-block; width: .3em; }
+  @keyframes jump { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-14px) rotate(-6deg); } }
+  .year { display: inline-block; background: var(--gold); color: var(--red-dark); padding: 0 .35em; border-radius: 14px; transform: rotate(-4deg); margin-left: .15em; animation: tilt 3s infinite ease-in-out; }
+  @keyframes tilt { 50% { transform: rotate(4deg) scale(1.08); } }
 
-        <footer>
-          <p>🎁 Lycka till med presentköpet! 🎁</p>
-        </footer>
+  .card {
+    color: var(--ink); border-radius: 30px; padding: 22px 16px; border: 9px solid transparent;
+    background: linear-gradient(#fffdf6, #fffdf6) padding-box, repeating-linear-gradient(45deg, var(--red) 0 14px, #fff 14px 28px) border-box;
+    box-shadow: 0 10px 0 rgba(0,0,0,.2), 0 28px 50px rgba(0,0,0,.4);
+  }
+  .card h2 { font-size: 1.45rem; margin-bottom: 14px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+  .chip {
+    font: inherit; font-weight: 600; font-size: 1.1rem; cursor: pointer; border: 0; display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 18px 8px 10px; border-radius: 999px; color: #fff; background: var(--green); box-shadow: 0 5px 0 #1b6f40;
+    transition: transform .15s cubic-bezier(.3,2,.5,1), box-shadow .15s; animation: chipin .5s backwards;
+  }
+  .chip i { font-style: normal; font-size: 1.6rem; background: rgba(255,255,255,.9); border-radius: 50%; width: 38px; height: 38px; display: grid; place-items: center; transition: transform .3s; }
+  .chip:nth-child(3n+1) { background: var(--red); box-shadow: 0 5px 0 var(--red-dark); }
+  .chip:nth-child(3n+2) { background: var(--blue); box-shadow: 0 5px 0 #1e56b5; }
+  .chip:hover { transform: translateY(-4px) rotate(-3deg) scale(1.06); } .chip:hover i { transform: rotate(360deg) scale(1.15); }
+  .chip:active { transform: translateY(4px) scale(.96); box-shadow: 0 1px 0 rgba(0,0,0,.3); }
+  @keyframes chipin { from { opacity: 0; transform: scale(0) rotate(-40deg); } }
+
+  /* gift */
+  .stage { margin: 4px 0 8px; user-select: none; position: relative; }
+  .gift { --s: 0; width: 190px; height: 190px; margin: 0 auto; position: relative; cursor: pointer; animation: bounce 1.4s infinite ease-in-out; filter: drop-shadow(0 18px 18px rgba(0,0,0,.4)); }
+  .gift.shake { animation: shake .55s; }
+  @keyframes bounce { 50% { transform: translateY(-14px) rotate(2deg); } }
+  @keyframes shake {
+    0%,100% { transform: rotate(0); } 20% { transform: rotate(calc(-7deg - var(--s) * 4deg)) scale(1.08); } 40% { transform: rotate(calc(7deg + var(--s) * 4deg)) scale(1.12); }
+    60% { transform: rotate(calc(-9deg - var(--s) * 4deg)) scale(1.12); } 80% { transform: rotate(calc(5deg + var(--s) * 4deg)) scale(1.06); }
+  }
+  .gift .box { position: absolute; bottom: 0; left: 10px; right: 10px; height: 120px; background: var(--red); border-radius: 0 0 16px 16px; overflow: hidden; }
+  .gift .box::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 34px; margin-left: -17px; background: var(--gold); }
+  .gift .box::after { content: '★ ✦ ★ ✦ ★'; position: absolute; inset: 40px 0 auto; color: rgba(255,255,255,.35); letter-spacing: 12px; font-size: 1rem; text-align: center; }
+  .gift .lid { position: absolute; left: 0; right: 0; bottom: 110px; height: 50px; background: #ff5566; border-radius: 12px; transition: transform .8s cubic-bezier(.3,1.6,.5,1), opacity .8s; z-index: 2; }
+  .gift .lid::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 34px; margin-left: -17px; background: var(--gold); }
+  .gift .bow { position: absolute; left: 50%; top: -32px; margin-left: -30px; font-size: 3.2rem; line-height: 1; z-index: 3; }
+  .gift.open { animation: none; } .gift.open .lid { transform: translate(70px, -170px) rotate(40deg); opacity: 0; }
+  .gift.open .box { animation: gulp .5s; } @keyframes gulp { 40% { transform: scale(1.12, .9); } }
+  .hint { font-size: 1.25rem; font-weight: 700; animation: pulse 1.2s infinite; min-height: 1.6em; }
+  @keyframes pulse { 50% { transform: scale(1.1) rotate(-1.5deg); } }
+  .dots { display: flex; gap: 8px; justify-content: center; margin: 4px 0 10px; }
+  .dots b { width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,.25); transition: .3s cubic-bezier(.3,2,.5,1); }
+  .dots b.on { background: var(--gold); transform: scale(1.5); box-shadow: 0 0 14px var(--gold); }
+
+  /* reveal */
+  .reveal { display: none; } .reveal.show { display: block; animation: pop .6s cubic-bezier(.2,1.6,.4,1); }
+  .for-whom { text-align: left; background: #fff7e0; border: 3px dashed var(--red); border-radius: 22px; padding: 14px 16px; position: relative; overflow: hidden; }
+  .for-whom + .for-whom { margin-top: 14px; }
+  .for-whom small { display: block; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--red-dark); font-size: .8rem; }
+  .for-whom .who { font-size: clamp(2rem, 11vw, 2.9rem); font-weight: 700; line-height: 1.15; color: var(--red); margin: 2px 0 8px; word-break: break-word; min-height: 1.2em; }
+  .for-whom .who.tick { animation: tick .12s; } .for-whom .who.done { animation: landed .8s cubic-bezier(.2,2,.4,1); color: var(--green); }
+  @keyframes tick { from { transform: translateY(-14px) scale(.9); opacity: .4; } }
+  @keyframes landed { 0% { transform: scale(.4) rotate(-12deg); } 60% { transform: scale(1.25) rotate(4deg); } 100% { transform: none; } }
+  .budget { display: inline-block; background: var(--green); color: #fff; font-weight: 700; padding: 4px 14px; border-radius: 999px; opacity: 0; transform: scale(0); }
+  .budget.show { opacity: 1; transform: none; animation: landed .6s cubic-bezier(.2,2,.4,1); }
+  .total { margin-top: 14px; font-weight: 700; color: var(--green); font-size: 1.15rem; }
+  .stamp {
+    display: inline-block; margin-top: 16px; border: 4px solid var(--red); color: var(--red); font-weight: 700; font-size: 1.3rem; letter-spacing: .12em;
+    padding: 4px 18px; border-radius: 10px; transform: rotate(-6deg); animation: stamp .5s cubic-bezier(.2,2,.4,1) backwards;
+  }
+  @keyframes stamp { from { transform: scale(3) rotate(-20deg); opacity: 0; } }
+  .secret { margin-top: 12px; font-weight: 600; font-size: .98rem; }
+  .btn { margin-top: 14px; font: inherit; font-weight: 700; font-size: 1.05rem; cursor: pointer; border: 0; color: #fff; background: var(--blue); box-shadow: 0 5px 0 #1e56b5; padding: 10px 20px; border-radius: 999px; transition: transform .12s; }
+  .btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #1e56b5; }
+  .tip { margin-top: 12px; background: #e8f5ff; border-radius: 16px; padding: 12px 14px; font-weight: 600; min-height: 3.2em; animation: pop .4s; }
+
+  .big { width: 100%; font: inherit; font-size: 1.3rem; font-weight: 700; letter-spacing: .02em; text-align: center; padding: 12px; border-radius: 16px; border: 3px solid var(--blue); color: var(--ink); outline: none; }
+  .big:focus { border-color: var(--red); box-shadow: 0 0 0 5px rgba(230,57,70,.2); }
+  .pickicon { font-size: 3.4rem; height: 4.2rem; line-height: 4.2rem; margin-top: 10px; }
+  .pickicon.pop { animation: landed .5s cubic-bezier(.2,2,.4,1); }
+  .link { background: none; border: 0; font: inherit; font-weight: 600; color: var(--blue); cursor: pointer; margin-top: 12px; text-decoration: underline; }
+  .note { margin-top: 14px; font-size: .95rem; opacity: .8; }
+  .shakeno { animation: nono .4s; } @keyframes nono { 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+  #music { position: fixed; right: 14px; bottom: 14px; z-index: 80; width: 52px; height: 52px; border-radius: 50%; border: 0; font-size: 1.6rem; cursor: pointer; background: #fff; box-shadow: 0 5px 0 rgba(0,0,0,.25); display: none; }
+  #music.ready { display: block; } #music.on { animation: pulse 1.2s infinite; } #music:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,.25); }
+  .error { color: #b3202d; font-weight: 600; margin-top: 10px; }
+  footer { position: relative; z-index: 2; text-align: center; padding: 8px 0 22px; opacity: .8; font-size: .95rem; }
+
+  .spark, .rainy { position: fixed; z-index: 70; pointer-events: none; will-change: transform; }
+  .spark { animation: spark .8s ease-out forwards; }
+  @keyframes spark { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(.2); opacity: 0; } }
+  .rainy { top: -50px; animation: rain linear forwards; }
+  @keyframes rain { to { transform: translateY(115vh) rotate(var(--r)); } }
+
+  /* "Minska rörelse": stäng bara av den ständiga bakgrundsrörelsen. Det man själv trycker fram (skak, konfetti, spelautomat) körs ändå. */
+  @media (prefers-reduced-motion: reduce) {
+    body, .blob, .floaty, .sleigh, .lights span, h1 .l, .year, .santa, .bubble, .hint { animation: none !important; }
+    .gift { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+<canvas id="snow"></canvas>
+<div id="floaties"></div>
+<div class="sleigh" id="sleigh">🦌🦌🦌🛷🎅</div>
+<canvas id="confetti"></canvas>
+<div class="lights" id="lights"></div>
+
+<main>
+  <!-- Skärm 1: välj namn -->
+  <section class="screen active" id="s-pick">
+    <div class="bubble" id="bubble">Ho ho ho! Vem är du? 🎅</div>
+    <div class="mascot" id="mascot" title="Kittla tomten!"><span class="santa" id="santa">🎅</span></div>
+    <h1 id="title" aria-label="Secret Santa"></h1>
+    <div class="card">
+      <form id="nameform" autocomplete="off">
+        <h2>Vad heter du? 👋</h2>
+        <input id="name" class="big" type="text" list="namelist" placeholder="Ditt förnamn" autocomplete="off" autocapitalize="words" spellcheck="false" aria-label="Ditt namn" />
+        <datalist id="namelist"></datalist>
+        <div class="pickicon" id="pickicon" aria-hidden="true">🎅</div>
+        <button class="btn" type="submit">Nästa ➜</button>
+      </form>
+      <form id="codeform" autocomplete="off" hidden>
+        <h2 id="codehello">Hej! Ditt hemliga julord 🔑</h2>
+        <input id="code" class="big" type="text" placeholder="ett julord, t.ex. rudolf" autocapitalize="none" autocomplete="off" spellcheck="false" maxlength="60" aria-label="Din hemliga kod" />
+        <button class="btn" type="submit">🎁 Öppna mitt paket</button>
+        <div><button class="link" type="button" id="notme">← Det är inte jag</button></div>
+      </form>
+      <p class="note" id="note">Du har fått ett personligt julord av Philip. Den fungerar bara för dig, så ingen kan smygtitta på någon annans!</p>
+      <p class="error" id="err" hidden></p>
+    </div>
+  </section>
+
+  <!-- Skärm 2: paketet -->
+  <section class="screen" id="s-gift">
+    <h1 id="hello" style="margin-bottom:6px">Hej!</h1>
+    <p id="gift-sub" style="font-size:1.15rem;margin-bottom:14px">Ditt hemliga paket väntar. Knacka på det!</p>
+    <div class="stage">
+      <div class="gift" id="gift" role="button" tabindex="0" aria-label="Öppna presenten">
+        <div class="lid"><span class="bow">🎀</span></div>
+        <div class="box"></div>
       </div>
     </div>
+    <div class="dots" id="dots"><b></b><b></b><b></b></div>
+    <p class="hint" id="hint">👆 Tryck 3 gånger!</p>
 
-    <script src="lookup-script.js"></script>
-  </body>
+    <div class="reveal" id="reveal">
+      <div class="card">
+        <div id="results"></div>
+        <div class="total" id="total"></div>
+        <div class="stamp" id="stamp" hidden>🤫 HEMLIGT!</div>
+        <p class="secret" id="secret" hidden>Berätta inte för någon. Det här stannar mellan dig och tomten!</p>
+        <button class="btn" id="tipbtn" hidden>🎲 Ge mig ett presenttips!</button>
+        <div class="tip" id="tip" hidden></div>
+      </div>
+    </div>
+  </section>
+</main>
+<button id="music" type="button" aria-label="Musik av/på" title="Musik av/på">🔇</button>
+<audio id="song" src="jul.mp3" loop preload="none"></audio>
+<footer>Gjord med 🍪, glögg och lite magi ✨<br /><small>Musik: "Holiday Weasel" av Kevin MacLeod (incompetech.com), <a href="https://creativecommons.org/licenses/by/4.0/" style="color:inherit" target="_blank" rel="noopener">CC BY 4.0</a></small></footer>
+
+<!--
+  DRAW DATA — generated by `node draw.mjs`. Do not edit by hand.
+  (Light base64 obfuscation so view-source isn't an instant spoiler. It is NOT encryption.)
+-->
+<script id="draw-data" type="text/plain">/*DRAW:START*/eyJ2IjozLCJ5ZWFyIjoyMDI2LCJpdGVyIjoyNTAwMDAsIm5hbWVzIjpbIkJvYm8iLCJDYXJpbmEiLCJDYXRhcmluYSIsIkVsaW4iLCJFdmEiLCJJZGEiLCJKb2NrZSIsIkp1bGlhIiwiUGhpbGlwIiwiUnVuZSIsIlNlZmEiLCJTb2ZpZSIsIlRpYmJlIl0sImJsb2JzIjpbeyJoIjoiZDBjZjNmMzc1YzBlIiwicyI6IjFqaUVKdE5sRHQzUFhFTmtmM294RGc9PSIsImkiOiJDU0pkUHJ0RUtuMmljaTZSIiwiYyI6Ill2WWJmQ1AzazRBdDlvZXd2amxqTno5a0J3bVcxL29RMzRYQlVmbGliaW8zRjlrb3pnUkswNmJNd3FoQzR6bHErMTFRMEp0cEwySUlrR1gzM3U2Z2Q1N0V0UGFCWTlCTGlBb1hRd0MwdXdDM3d1KzY1NGZReXFFVnFuNlBUV0NaNkhkY3hJbmNrbFB0MEJpOUEwMmthei9DbnAwWkdMZFIraU81enR4ZjF3SkdYS3AwL0Q1SGp3ZHU4c0g5QjRWeEJUZU9EMnVKZ09leUxpVFhrdzFnWVA4PSJ9LHsiaCI6Ijc1OWUyNzRmZDVjZiIsInMiOiIzMXB2T2xjYThMOGJLNTkxNkpnM0NnPT0iLCJpIjoidEZhVUhlaTJBY3ROeGxJNSIsImMiOiJpYUk5ZER0c2dVTEw5VmFZbFBUTExIOWpOaTJJQjI0bXRTU0NoUk5OVWNxTHFQS3pvTWJ0alVRYXhrbXVzYVlQRjZER2J1c3JiNHp0RmpZcmxzYldqMDM4YzhEQzZTNUdKWHpEckZqWGZNYlNmUHRRRk5iNW9JRnJjdTVrOVZ1VDlyNGMwMnpibWRFVlB6M2V6YndBV0dKZ2REQ2hGL2krSWRoZ1ltV1dSTitTREg1YXB5U1JRbDdZcjdWd1hieENUMkY1a0dxSHVMbFQvUT09In0seyJoIjoiMjI5ZDBlMmI0ZDM5IiwicyI6IkxnTXRsWmlCK0owTUg1dGZOMHdhTEE9PSIsImkiOiJ2M2pkdEV0YmVvcGs1RHR3IiwiYyI6Ijk0YU9sY2pIVnN6MTBSZFpBTzRwSFBPRGd5TERpRTQvbU95T1krN0pBWFZOT2xlcjFiSkV0K0M5NWYwZThtN2xjRHVCWVVOcnA2WlE3ekNSWlYxRnVGbzVwOGRBMGpqYitTcmNwb3lhNk5RV3A5ejM4NkNZUytHVTJ1dmFldFl6Z1lXTm5wTU1YUGRmSjF4SzJmeExCb0lrOHFjUXhHRXltZ25NTXNvTjF6N0FIbDhZZVVZVmFWSUo4bTQvaERUN0Z1dGRUeWRDamwyU3FkQ2RzUjdWNlJ4b3J1T2RCTTIwWVQwRDVjQ2JIRXZvZjVvT09NNVR4TFl6aG5NSmJ0SmNidTFrMTIvcTVkb1JPeVRZM2V2aUloeDNZQUJSa2VJbFlDb24vSTVtbXV2bm5IL0JjQmpweXlEVUpZTTFrcHpkenNzekpWOVdsNC8wdjJSRzBpcU1rUkJ6aGN3TUI3NFVTOHB3ZytZeHUxZHU0aFVHODNNR1RoVXF2dz09In0seyJoIjoiYjA3Y2VjNmYyMGZkIiwicyI6ImNQY3ZzK3JOb1lRSkNaSnRwUG5IMWc9PSIsImkiOiJ6eFBGSm55UGVNV0hTcmthIiwiYyI6IlFPU1JDUWVUNStmYXZ0T2FVVDZmL1ZLaFNaRnc0aVd2Y2psTlZYdTZ0Z2h0Wk5HY1VWQ3lkYWl2bGp1U0Z4TW9GMVJwS3VNZW0zSkVlazVGTjdHWFU3dmRMZHVrdmlxQS9ReFZudlRIUmcrcSthY3c5djd5dTdvNVZjZTB4U0dRZUVzM3ZxUjcrWENKcjE0UVBGV3l3RE5GNldKVGJ6SHJDY0lBVjdMaDErNHU5RXVuSlhLVEhTdFdZS2JGUFcyeE9DTy9oWEl6c1U1WlpkS3AifSx7ImgiOiIzMzQwODFkNWUzNDUiLCJzIjoiNkVkN1hTZHprekdPQXJVVW5WTHoxZz09IiwiaSI6ImN5L1YxUHpNZ0VXWlRsMG4iLCJjIjoiSHI4UTJmMmJCblcxcjJqdzR2dmxVYmVIeDcvVzdYd1lQR0ZXTEN3STMvMktudUtwVzcyaGZzNnloaGltelBlWDVReXM0L3VRdzlTMExFUGZzckdMS3IxLzJJaCtvWkZvK1QyYUlQNzkwbG9veEwvbm1XS1c1d1ljK0htcVMwQUlKNGhzbkJxQTJMRlcrR1NNbzNKSjRZNkFjWHpLQWRzaWRiZmR5TzVxN3ptaDNLMmJaYkJ3RzFaWWdUdWhKUHVSNVM1aEYwQnhnTXpEWHkyMG1qdjlIaVhndkc0PSJ9LHsiaCI6ImUzNGI1ZDg1MTg0YyIsInMiOiJKQ1VXTVFKRHJEQzRLKzR6N3M4TFZRPT0iLCJpIjoibVJMdmdVck0yZjdiczI1QyIsImMiOiJIUTRZTmcrdjZHMld1UDlSV1ZVQ2tzY3Y1a1FWTG9YSkhOZUVrcTBpdlZ3dnVBeVpxaUVMUFJ6NEE2dGNFRTQ1NmVZV3NyUXZIbUJUYk5BOXZFRkRjQmxlNXNwQWYxTEJPUHVjKzNZTktoRjIrWWl1bVUyRGRtK2NKeFlVUURGYnk1dFNsU29hbVVGcE9mMDVmUkRqVWwvYzFXN20vK2g5bFJGZHlkcnJXeUVjSWUyTHR3dm5CWnFDREtGK0JFRTRFS2FyZWxwRHQ1Wm04Z2tGIn0seyJoIjoiNjRhMzg3NjkwMjM1IiwicyI6Im9lK21KRWI3WjRwbUtrN1ptV2w4blE9PSIsImkiOiJKS2dqWDA0eXNiSk40Y1NCIiwiYyI6Imp5YTRzcWxJTk9menU0ZlFnazd0di9VSmI3czg5M2ZKY2MrbklQTnZoTDhFeC96MkwwZlc2Q2ZoVkdIVkJ3SSt3NHR4Ny95NGtpY0RHOG9iUEJzcktjV0M5YSt6TEJGd1pjdG4wMndWbVNCY0F3cmZGZEdWZWNWTVdsdzJHcU1LVkoyeHB6TFo5YXJVRVNjb1lXVkxLNWNJYjA2aVhyU3Rtck50WnZQb1lYYmJaTUhsbzVzK1FnNDlUVW1iVjBQQ2hYTzFCREhYOExTSllJUkR0cVpiZFpWViJ9LHsiaCI6IjIwY2UyNzczMTYyNiIsInMiOiJCd2xWSm9VZ25aQ1FsQ2x0M0ZhM0FRPT0iLCJpIjoiSDRxNjVOWEJMb1dCMFFnMCIsImMiOiIxNEhXbFR0c0wzTGVKNDhTWWQwUXNGbitvWmRkMVE3dTZYMHdicEJEWFdPclh6blNnR1dZT3k5NlNFeU01bkRsTjZ1Ym5KL2l4SVMwUU5Ed0t2UzhiK0hKbUExejhXOGw1Q0d0Nkg5N3MwdVZvdkROV2dwbTd2c3BaMnArd3kyRjgvQ0cwWmtqUzNteGNPa0FKWUVzRXRzdTBUN055Wk5uS2g0MUJ3S2JxZXRURWtwa0d6c1BLbU9xdmhWWGQzcEhQeTRIQzNscm1iNm44bDYvUmgvU0N4encifSx7ImgiOiJmYjFiYTk5YzY0MWIiLCJzIjoibE5BclY3WmRHR21aelNGVUVWYW9VUT09IiwiaSI6IlNHcWV2bjQ5NCt2MTdmelciLCJjIjoiR09iRzZhU0p6MnBYNDY0NXY1SDc1SWNSbVdWTTFRbVNOUUhoWnZiKzRRcEtVM0FrN1pNeFJvbFNlL0pQN00ycWIzRTlqOFo5MlJpQWlBR2FTb0hyV2MzSXlCK1Vud2tLRUU5Ky9BeS9lekdDcFltQTYxQ0FYV1doeG5jdVdvTlRydDlxbFpCR1VTek5KVUIrbmNqemhhdDlXMWZqQk11U2xDNkN4NXdvVEFWNlI0NlR0ZWtUckJWV0ttQmxQQ0RJczNlQTlOb0FHci83Q3RNWEZYNksyOTQ9In0seyJoIjoiM2EwNDhjNmJhZWZkIiwicyI6Ijd3Z2p6aXhkcm95aE5LSnduM1E0cEE9PSIsImkiOiJUSDQrcnhhSXd2WnkzRmhaIiwiYyI6InNXRVJHUnF5bE9NTkdVNzNzQzNGZGRiTEowVWdNTm5YN3RYVjZ6cGlsR3dtdGRuWUpYcjZCeGJDTDFnWkZaa3VIWVdvRjUrRGxaQWg2dHRxODY4LzFmY1lBWkVwNUxCS04yclIrdHREQzBnRkxYWXpUSlI0S2VYeXFuUDA4ODkxUzU1bDNUSDJBcHlXWjBhQVpObzM3ZWFFWnR2UXNJcHJZK1dlSkIwYkEvYmpxR3RiZWZlM3ByQ2s2Q1NtRlNtWDFKb1Vzb25KL1R2dnUzdk82QT09In0seyJoIjoiMmNmYzgwNGYxODQwIiwicyI6IlZVYjJnamZITDc1SUxIaksvY0k3bUE9PSIsImkiOiIxaGM4MmJGVlZwc2pwMUkrIiwiYyI6InkydnMwOE04MURGQWkrc3ZRZit1UUFEbHhOanQrbUZzRU8yY0gwR0hkZEJRZnp0VVVud1h5elV0K1pSZVU2SW5yV1V2QnlleGxQTmRNczk2aFJUYlJLTDJaNTRoNkZTV0dkcFhBSUp1bUhwVDUxejdwWXlxWnlIOWhoRzlEK0NHZTNFRUVoRFhzS2dXejZQbjNrU1Rtc3hZQmRzMFI3eVJVL0pGVGpRL3lacnpLWGxPSEw3MWh5TjJ0RytPWnRlOG1GVVBHdy9oN29tcUpyUms5VE9qUVhHckxZUUp3ZXg3OHVHbzQxV0VMd01uTFROV21iVFM4bFh0cndOZnd2bzMyd0tzeVM3bnJYZ1hVUGRnQlF4ZU83VERzcVNCSU0zemFZWVhNTFkwNjQydVlUSG1jcHFoNlpiWnMxb1MrYUNxRjhIcVAvcnBpeDVTS0ZTekNHMWNsL0RkNFRxMVFPRFQzTkg3Rk9icFV5cUduTUhzIn0seyJoIjoiZGRjMmRiMjM3OGVhIiwicyI6Imo2UElseHMvTUN4Q1RXUy9rS3FmN3c9PSIsImkiOiJPZktwWmkrS1ZJREp4QkNBIiwiYyI6IjVyS2IyS25qOW9IeExidFVwSklFVkR3cnRRUDQ5Z1JXaWdZOXZhWW9SSTlYc25Sc0tvWUhvYVhJMi9PQURENjhoODkxOWlRMG5TVXhIVk1KRDAzREMzRVlvMXVac0xjY0hIUElUbUhjOWRMZVZScmNiZVBUVTlxNnFVVU5teldXUDBoUWJ3eWEvRnI4dFdYZDlJcmV5N2s1Z0cyaVZkalV5NmhIbklSTXY4b2M4aUZaWFN5RmFzRkRIVXV1cGRsa2hmR2xpbENnTmVUU01aRT0ifSx7ImgiOiIyMWU4NjMzM2RkY2YiLCJzIjoiZGZGbHVHcG1ORzJVTEtsWVBVNlgyQT09IiwiaSI6InY1WE4yRm1USWFMREtuK3UiLCJjIjoiTkhzblYwNHZBQ3lockZiRUp3QkJLclhLSTBlRmJueHVnK3NvYjZjUVpBRWtNZWRCQ1ZoUjdtd2lHemJ4alptSmhBWXZBRTZLWGF5WG16Q2dhMjFoajhibnVNUUFIcmVBdmxuKy9WcEx4T3B2UHl0alUwWlJWZkk2YmFPLzVTZUhkQVVUK09NcFpqNkFFd01ETFFONE5SVE0wbjJsS1ZpbE9HOTJwZmd6Rlhjdk1vSFVhT0NReG0vTHFXd0EwNkdZdDUwRlZkcjBkdHcyVFpOVUwwL0V1Vk5yIn1dfQ==/*DRAW:END*/</script>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches; // bara bakgrunden
+  var reduce = false; // användarutlösta effekter körs alltid
+  var rnd = function (a) { return a[(Math.random() * a.length) | 0]; };
+  var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, reduce ? 0 : ms); }); };
+
+  /* ---------- load draw ---------- */
+  var raw = $('draw-data').textContent.replace('/*DRAW:START*/', '').replace('/*DRAW:END*/', '').trim();
+  var DRAW = null;
+  try {
+    var bin = atob(raw), bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    DRAW = JSON.parse(new TextDecoder().decode(bytes));
+  } catch (e) {}
+
+  /* ---------- wiggly title ---------- */
+  var colors = ['#ff4d5e', '#ffd166', '#4ade80', '#60a5fa', '#ff8fab', '#fff'];
+  var title = $('title');
+  'Secret Santa'.split('').forEach(function (c, k) {
+    var s = document.createElement('span');
+    if (c === ' ') { s.className = 'sp'; } else { s.className = 'l'; s.textContent = c; s.style.color = colors[k % colors.length]; s.style.animationDelay = (k * .12) + 's'; }
+    title.appendChild(s);
+  });
+  var yr = document.createElement('span'); yr.className = 'year'; title.appendChild(document.createTextNode(' ')); title.appendChild(yr);
+
+  var err = $('err');
+  if (!DRAW) {
+    err.hidden = false; err.textContent = 'Dragningen är inte klar än. Kontakta Philip!';
+    return;
+  }
+  yr.textContent = DRAW.year;
+
+  /* ---------- santa talks ---------- */
+  var lines = [
+    'Ho ho ho! Vem är du? 🎅', 'Har du varit snäll i år? 😇', 'Jag lovar att inte kika... 👀', 'Kittla mig igen! 🤭',
+    'Pepparkakorna är mina. 🍪', 'Rudolf har snuva idag. 🦌', 'Psst, tryck på ditt namn! 👇', 'Jag har checkat listan. Två gånger. 📜',
+    'Mer glögg, tack! 🍷', 'Hihihi, det kittlas! 🎄'
+  ];
+  var bubble = $('bubble'), santa = $('santa'), li = 0;
+  function say(t) { bubble.textContent = t || lines[li = (li + 1) % lines.length]; }
+  $('mascot').addEventListener('click', function () {
+    santa.classList.remove('hop'); void santa.offsetWidth; santa.classList.add('hop'); say(); burst(25);
+  });
+  setInterval(function () { if ($('s-pick').classList.contains('active')) say(); }, 5000);
+
+  /* ---------- unlock with personal code ---------- */
+  // Varje namn får en egen julikon (delas ut i ordning, så ingen får samma som någon annan)
+  var avatars = ['🎅', '🤶', '🧝', '🦌', '⛄', '🎄', '🎁', '⭐', '🔔', '🍪', '🧦', '🕯️', '🍬', '❄️', '🎀', '🥛', '🛷', '🧤'];
+  function avatar(n) { var i = DRAW.names.indexOf(n); return avatars[(i < 0 ? 0 : i) % avatars.length]; }
+
+  var b64 = function (s) { var b = atob(s), u = new Uint8Array(b.length); for (var z = 0; z < b.length; z++) u[z] = b.charCodeAt(z); return u; };
+  var normalize = function (s) { return (s || '').toLowerCase().replace(/å|ä/g, 'a').replace(/ö/g, 'o').replace(/[^a-z0-9]/g, ''); };
+
+  // Try the code against every blob; only the right person's blob decrypts.
+  async function unlockWith(code, blobs) {
+    var enc = new TextEncoder();
+    var base = await crypto.subtle.importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveKey']);
+    for (var k = 0; k < blobs.length; k++) {
+      var bl = blobs[k];
+      try {
+        var key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64(bl.s), iterations: DRAW.iter, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+        var pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(bl.i) }, key, b64(bl.c));
+        return JSON.parse(new TextDecoder().decode(pt));
+      } catch (e) { /* not this one */ }
+    }
+    return null;
+  }
+
+  var nameForm = $('nameform'), form = $('codeform'), input = $('code'), nameIn = $('name'), busy = false, who = null;
+  var dl = $('namelist'); DRAW.names.forEach(function (n) { var o = document.createElement('option'); o.value = n; dl.appendChild(o); });
+
+  async function nameTag(n) {
+    var d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('santa:' + n.trim().toLowerCase()));
+    return Array.prototype.map.call(new Uint8Array(d), function (x) { return ('0' + x.toString(16)).slice(-2); }).join('').slice(0, 12);
+  }
+  function fail(msg, el) {
+    err.hidden = false; err.textContent = msg; el = el || input;
+    el.classList.remove('shakeno'); void el.offsetWidth; el.classList.add('shakeno');
+  }
+  var cryptoOk = function () { return window.crypto && crypto.subtle; };
+  var noCrypto = 'Din webbläsare kan inte öppna sidan här. Använd länken via https (inte som fil).';
+
+  // Julikonen dyker upp medan man skriver sitt namn
+  nameIn.addEventListener('input', function () {
+    var t = nameIn.value.trim().toLowerCase(), m = DRAW.names.filter(function (n) { return n.toLowerCase() === t; })[0];
+    var pi = $('pickicon'), ic = m ? avatar(m) : '🎅';
+    if (pi.textContent !== ic) { pi.textContent = ic; pi.classList.remove('pop'); void pi.offsetWidth; pi.classList.add('pop'); }
+  });
+
+  // Steg 1: namn + Enter
+  nameForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var typed = nameIn.value.trim().toLowerCase();
+    var match = DRAW.names.filter(function (n) { return n.toLowerCase() === typed; })[0];
+    if (!match) return fail(typed ? 'Hittar inte "' + nameIn.value.trim() + '". Kolla stavningen! 🤔' : 'Skriv ditt namn först!', nameIn);
+    who = match; err.hidden = true;
+    $('codehello').textContent = 'Hej ' + who + '! ' + avatar(who) + ' Vad är ditt julord? 🔑';
+    nameForm.hidden = true; form.hidden = false; $('note').hidden = true; input.focus(); say('Hej ' + who + '! Vad är ditt julord? 🤫');
+  });
+  $('notme').addEventListener('click', function () {
+    who = null; err.hidden = true; input.value = ''; form.hidden = true; nameForm.hidden = false; $('note').hidden = false; nameIn.focus();
+  });
+
+  // Steg 2: kod + Enter
+  async function tryCode(raw, onlyWho) {
+    if (busy) return; var code = normalize(raw);
+    if (code.length < 2) return fail('Skriv ditt julord, till exempel rudolf.');
+    if (!cryptoOk()) return fail(noCrypto);
+    busy = true; err.hidden = true; form.querySelector('button.btn').textContent = '🔓 Låser upp…';
+    var cands = DRAW.blobs;
+    if (onlyWho) { var tag = await nameTag(onlyWho); cands = DRAW.blobs.filter(function (x) { return x.h === tag; }); }
+    var me = await unlockWith(code, cands);
+    busy = false; form.querySelector('button.btn').textContent = '🎁 Öppna mitt paket';
+    if (!me && !onlyWho) $('codehello').textContent = 'Ditt hemliga julord 🔑';
+    if (!me) return fail(onlyWho ? 'Fel julord för ' + onlyWho + '. Försök igen! 🤔' : 'Det ordet stämmer inte. Dubbelkolla att du skrev rätt! 🤔');
+    start(me);
+  }
+  form.addEventListener('submit', function (e) { e.preventDefault(); tryCode(input.value, who); });
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(function (s) { s.classList.remove('active'); });
+    $(id).classList.add('active'); window.scrollTo(0, 0);
+  }
+
+  var current = null, taps = 0, opened = false;
+  function start(me) {
+    current = me;
+    $('hello').textContent = 'Hej ' + me.name + '! ' + avatar(me.name);
+    show('s-gift'); burst(40);
+    try { history.replaceState(null, '', location.pathname + location.search); history.pushState(null, '', location.href); } catch (e) {}
+  }
+  window.addEventListener('popstate', function () { if (current) { try { history.pushState(null, '', location.href); } catch (e) {} } });
+
+  // Personal link: #CODE opens automatically
+  if (location.hash.length > 1) {
+    var hs = decodeURIComponent(location.hash.slice(1)), ix = hs.indexOf('~');
+    var hn = ix > 0 ? hs.slice(0, ix) : null, hc = ix > 0 ? hs.slice(ix + 1) : hs;
+    var hwho = hn && DRAW.names.filter(function (n) { return n.toLowerCase() === hn.toLowerCase(); })[0] || null;
+    nameForm.hidden = true; form.hidden = false; $('note').hidden = true;
+    $('codehello').textContent = hwho ? 'Hej ' + hwho + '! ' + avatar(hwho) : 'Låser upp… 🔓';
+    input.value = hc; if (hwho) who = hwho; tryCode(hc, hwho);
+  }
+
+
+  /* ---------- gift: 3 taps ---------- */
+  var gift = $('gift'), dots = $('dots').children;
+  var hints = ['👆 Tryck 3 gånger!', '😮 Den rör på sig! En gång till!', '🤯 Nu händer det!!'];
+  // Kraftig skakning som blir värre för varje tryck (Web Animations API, funkar överallt)
+  function shake(level) {
+    var a = 8 + level * 7, x = 6 + level * 5;   // grader / pixlar
+    try { if (navigator.vibrate) navigator.vibrate(40 * level); } catch (e) {}
+    if (reduce || !gift.animate) return;
+    gift.animate([
+      { transform: 'translate(0,0) rotate(0) scale(1)' },
+      { transform: 'translate(' + (-x) + 'px,-8px) rotate(' + (-a) + 'deg) scale(1.12)' },
+      { transform: 'translate(' + x + 'px,0) rotate(' + a + 'deg) scale(1.15)' },
+      { transform: 'translate(' + (-x) + 'px,-6px) rotate(' + (-a) + 'deg) scale(1.12)' },
+      { transform: 'translate(' + x + 'px,0) rotate(' + (a * .7) + 'deg) scale(1.1)' },
+      { transform: 'translate(' + (-x / 2) + 'px,-4px) rotate(' + (-a * .5) + 'deg) scale(1.05)' },
+      { transform: 'translate(0,0) rotate(0) scale(1)' }
+    ], { duration: 550 + level * 100, easing: 'ease-in-out' });
+  }
+  function tap() {
+    if (opened || !current) return;
+    taps++;
+    shake(taps);
+    for (var d = 0; d < taps; d++) dots[d].classList.add('on');
+    var r = gift.getBoundingClientRect(); sparkles(r.left + r.width / 2, r.top + 40, ['✨', '⭐', '💫'], 8 + taps * 4);
+    if (taps < 3) { $('hint').textContent = hints[taps]; return; }
+    opened = true; $('hint').style.visibility = 'hidden';
+    setTimeout(function () { gift.classList.add('open'); reveal(); }, 900);
+  }
+  gift.addEventListener('click', tap);
+  gift.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap(); } });
+
+  /* ---------- slot machine reveal ---------- */
+  function roller(el, pool, target) {
+    return new Promise(function (resolve) {
+      if (reduce) { el.textContent = avatar(target) + ' ' + target; el.classList.add('done'); return resolve(); }
+      var steps = 24, n = 0, last = '';
+      (function next() {
+        n++;
+        var t = n >= steps ? target : rnd(pool.filter(function (x) { return x !== last; }));
+        last = t; el.textContent = avatar(t) + ' ' + t;
+        el.classList.remove('tick'); void el.offsetWidth; el.classList.add('tick');
+        if (n >= steps) { el.classList.remove('tick'); el.classList.add('done'); return resolve(); }
+        setTimeout(next, 45 + Math.pow(n / steps, 3) * 520);
+      })();
+    });
+  }
+
+  function reveal() {
+    $('gift-sub').textContent = 'Du ska köpa present till…  🥁';
+    $('reveal').classList.add('show');
+    $('reveal').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var res = $('results'); res.innerHTML = ''; var total = 0;
+    var chain = Promise.resolve();
+    current.gifts.forEach(function (f) {
+      var target = f.to; total += f.budget;
+      var d = document.createElement('div'); d.className = 'for-whom';
+      var s = document.createElement('small'); s.textContent = current.gifts.length > 1 ? f.family : 'Din mottagare';
+      var w = document.createElement('div'); w.className = 'who'; w.textContent = '🎁 …';
+      var b = document.createElement('span'); b.className = 'budget'; b.textContent = 'Budget: ' + f.budget + ' kr';
+      d.appendChild(s); d.appendChild(w); d.appendChild(b); res.appendChild(d);
+      var pool = f.pool;
+      chain = chain.then(function () { return sleep(300); })
+        .then(function () { return roller(w, pool, target); })
+        .then(function () { b.classList.add('show'); burst(120); rain(['🎁', '⭐', '🎄', '🍬', '❄️']); return sleep(900); });
+    });
+    chain.then(function () {
+      if (current.gifts.length > 1) $('total').textContent = 'Totalt: ' + total + ' kr (' + current.gifts.length + ' presenter)';
+      $('gift-sub').textContent = 'Ho ho ho! Där satt den! 🎉';
+      ['stamp', 'secret', 'tipbtn'].forEach(function (id) { $(id).hidden = false; });
+    });
+  }
+
+  /* ---------- tips ---------- */
+  var tips = [
+    '🎯 Tänk på personens intressen och hobbys.', '✂️ Hemgjort är alltid uppskattat. Även om det ser konstigt ut.',
+    '🧦 Strumpor är aldrig fel. (Ibland är de fel.)', '🕵️ Fråga andra om tips, utan att avslöja vem du köper till!',
+    '🎀 Glöm inte paketpapper och kort. Tejp är också bra.', '🍫 Något ätbart går nästan alltid hem.',
+    '📦 Stor ask, liten present = maximalt skoj.', '🎵 Skapa en spellista åt personen. Det är gratis (och gulligt).',
+    '🔍 Lyssna efter hintar de senaste veckorna. Folk avslöjar mer än de tror.', '🤫 Skvallra INTE. Nissen ser dig.',
+    '🧶 Mysiga saker vinner alltid. Filt, ljus, te.', '😂 Något som får personen att skratta slår något dyrt.'
+  ];
+  var ti = (Math.random() * tips.length) | 0;
+  $('tipbtn').addEventListener('click', function () {
+    var t = $('tip'); t.hidden = false; t.style.animation = 'none'; void t.offsetWidth; t.style.animation = '';
+    t.textContent = tips[ti = (ti + 1) % tips.length]; burst(15);
+  });
+
+  /* ---------- music: jul.mp3 if present, otherwise a built-in music-box "Bjällerklang" ---------- */
+  (function () {
+    var au = $('song'), btn = $('music'), want = true, started = false, useSynth = false, synthOn = false;
+    try { want = localStorage.getItem('santa-music') !== 'off'; } catch (e) {}
+    au.volume = .45;
+    var AC = window.AudioContext || window.webkitAudioContext;
+
+    // Bjällerklang (Jingle Bells, trad./PD). [frequency Hz, beats]
+    var C = 523.25, D = 587.33, E = 659.25, F = 698.46, G = 783.99;
+    var verse = [[E,1],[E,1],[E,2],[E,1],[E,1],[E,2],[E,1],[G,1],[C,1.5],[D,.5],[E,4],
+                 [F,1],[F,1],[F,1.5],[F,.5],[F,1],[E,1],[E,1],[E,.5],[E,.5]];
+    var song = verse.concat([[E,1],[D,1],[D,1],[E,1],[D,2],[G,2]], verse.slice(0, 11),
+                 [[F,1],[F,1],[F,1.5],[F,.5],[F,1],[E,1],[E,1],[E,.5],[E,.5],[G,1],[G,1],[F,1],[D,1],[C,4]]);
+    var BEAT = .4, ctx = null, master = null, timer = 0;
+
+    function note(t, f, beats) {
+      [[1, .55], [2, .22], [3, .08]].forEach(function (h) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = f * h[0];
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(h[1], t + .01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(.5, beats * BEAT * 1.8));
+        o.connect(g); g.connect(master); o.start(t); o.stop(t + beats * BEAT * 1.8 + .6);
+      });
+    }
+    function loop() {
+      master = ctx.createGain(); master.gain.value = .22; master.connect(ctx.destination);
+      var t = ctx.currentTime + .08, total = 0;
+      song.forEach(function (n) { note(t + total * BEAT, n[0], n[1]); total += n[1]; });
+      timer = setTimeout(loop, (total * BEAT + 1.2) * 1000);
+    }
+    function startSynth() {
+      if (!AC) return;
+      if (!ctx) ctx = new AC();
+      if (ctx.state === 'suspended') ctx.resume();
+      if (synthOn) return; synthOn = true; loop(); sync();
+    }
+    function stopSynth() { synthOn = false; clearTimeout(timer); try { master.disconnect(); } catch (e) {} sync(); }
+
+    function playing() { return useSynth ? synthOn : !au.paused; }
+    function sync() { var on = playing(); btn.textContent = on ? '🔊' : '🔇'; btn.classList.toggle('on', on); }
+    function play() { if (useSynth) startSynth(); else { var p = au.play(); if (p && p.then) p.then(sync, sync); } }
+    function pause() { if (useSynth) stopSynth(); else { au.pause(); sync(); } }
+
+    // No jul.mp3 (or it can't load)? Use the built-in melody instead.
+    au.addEventListener('error', function () { useSynth = !!AC; if (useSynth) btn.classList.add('ready'); });
+    au.addEventListener('canplay', function () { useSynth = false; btn.classList.add('ready'); });
+    au.addEventListener('play', sync); au.addEventListener('pause', sync);
+    au.load();
+
+    // Try to start right away. Browsers often refuse until the visitor has interacted,
+    // so we also start on the very first tap, touch or key press (typing the name counts).
+    function kick() { if (want && btn.classList.contains('ready') && !started) { started = true; play(); } }
+    au.addEventListener('canplay', function () {
+      if (!want || started || useSynth) return;
+      var p = au.play();
+      if (p && p.then) p.then(function () { started = true; sync(); }, function () { /* blocked, wait for a gesture */ });
+    });
+    var evs = ['pointerdown', 'keydown', 'touchstart'];
+    function first(e) {
+      if (e.target === btn) return;
+      evs.forEach(function (n) { document.removeEventListener(n, first, true); });
+      kick();
+    }
+    evs.forEach(function (n) { document.addEventListener(n, first, true); });
+    btn.addEventListener('click', function () {
+      started = true;
+      if (!playing()) { want = true; play(); } else { want = false; pause(); }
+      try { localStorage.setItem('santa-music', want ? 'on' : 'off'); } catch (e) {}
+    });
+  })();
+
+  /* ---------- lights ---------- */
+  for (var j = 0; j < 16; j++) $('lights').appendChild(document.createElement('span'));
+
+  /* ---------- floating emojis + sleigh ---------- */
+  if (!calm) {
+    var fl = $('floaties'), fe = ['🎄', '🍬', '🦌', '🧦', '🔔', '⭐', '🍪', '🥛', '🎁', '❄️', '🕯️', '🧤'];
+    for (var m = 0; m < 14; m++) {
+      var e = document.createElement('div'); e.className = 'floaty'; e.textContent = fe[m % fe.length];
+      e.style.left = (Math.random() * 95) + '%'; e.style.fontSize = (1.4 + Math.random() * 1.6) + 'rem';
+      e.style.animationDuration = (22 + Math.random() * 26) + 's'; e.style.animationDelay = (-Math.random() * 40) + 's';
+      fl.appendChild(e);
+    }
+    var sl = $('sleigh');
+    (function fly() {
+      sl.classList.remove('go'); void sl.offsetWidth; sl.style.top = (8 + Math.random() * 25) + '%'; sl.classList.add('go');
+      setTimeout(fly, 16000 + Math.random() * 8000);
+    })();
+  }
+
+  /* ---------- tap sparkles anywhere ---------- */
+  function sparkles(x, y, set, n) {
+    if (reduce) return;
+    for (var q = 0; q < n; q++) {
+      var s = document.createElement('div'); s.className = 'spark'; s.textContent = rnd(set);
+      var a = Math.random() * 6.283, dist = 40 + Math.random() * 90;
+      s.style.left = x + 'px'; s.style.top = y + 'px'; s.style.fontSize = (.9 + Math.random()) + 'rem';
+      s.style.setProperty('--dx', Math.cos(a) * dist + 'px'); s.style.setProperty('--dy', Math.sin(a) * dist + 'px'); s.style.setProperty('--r', (Math.random() * 360) + 'deg');
+      document.body.appendChild(s); setTimeout(function (el) { el.remove(); }.bind(null, s), 900);
+    }
+  }
+  document.addEventListener('pointerdown', function (e) { sparkles(e.clientX, e.clientY, ['✨', '❄️', '⭐', '🎄', '💖'], 5); });
+
+  function rain(set) {
+    if (reduce) return;
+    for (var q = 0; q < 26; q++) {
+      var s = document.createElement('div'); s.className = 'rainy'; s.textContent = rnd(set);
+      s.style.left = (Math.random() * 100) + 'vw'; s.style.fontSize = (1.2 + Math.random() * 1.6) + 'rem';
+      s.style.setProperty('--r', (Math.random() * 720 - 360) + 'deg');
+      var dur = 2.2 + Math.random() * 2.2; s.style.animationDuration = dur + 's'; s.style.animationDelay = (Math.random() * 1.2) + 's';
+      document.body.appendChild(s); setTimeout(function (el) { el.remove(); }.bind(null, s), (dur + 1.5) * 1000);
+    }
+  }
+
+  /* ---------- snow ---------- */
+  var sc = $('snow'), sx = sc.getContext('2d'), flakes = [];
+  function sizeSnow() { sc.width = innerWidth; sc.height = innerHeight; }
+  sizeSnow(); addEventListener('resize', sizeSnow);
+  for (var f = 0; f < (calm ? 0 : 110); f++) flakes.push({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, r: Math.random() * 3 + 1, v: Math.random() + .4, p: Math.random() * 6 });
+  (function snow() {
+    sx.clearRect(0, 0, sc.width, sc.height); sx.fillStyle = 'rgba(255,255,255,.85)';
+    flakes.forEach(function (o) {
+      o.y += o.v; o.p += .02; o.x += Math.sin(o.p) * .5;
+      if (o.y > sc.height + 5) { o.y = -5; o.x = Math.random() * sc.width; }
+      sx.beginPath(); sx.arc(o.x, o.y, o.r, 0, 6.283); sx.fill();
+    });
+    requestAnimationFrame(snow);
+  })();
+
+  /* ---------- confetti ---------- */
+  var cc = $('confetti'), cx = cc.getContext('2d'), bits = [], running = false;
+  function sizeC() { cc.width = innerWidth; cc.height = innerHeight; }
+  sizeC(); addEventListener('resize', sizeC);
+  var cols = ['#e63946', '#ffd166', '#2a9d5c', '#60a5fa', '#ff8fab', '#ffffff'];
+  function burst(n) {
+    if (reduce) return;
+    for (var q = 0; q < n; q++) bits.push({
+      x: innerWidth / 2, y: innerHeight * .45, vx: (Math.random() - .5) * 18, vy: Math.random() * -15 - 4,
+      s: Math.random() * 8 + 5, c: rnd(cols), a: Math.random() * 6, va: (Math.random() - .5) * .4, life: 140 + Math.random() * 60
+    });
+    if (!running) { running = true; frame(); }
+  }
+  function frame() {
+    cx.clearRect(0, 0, cc.width, cc.height);
+    bits = bits.filter(function (b) { return b.life-- > 0 && b.y < cc.height + 20; });
+    bits.forEach(function (b) {
+      b.vy += .35; b.vx *= .99; b.x += b.vx; b.y += b.vy; b.a += b.va;
+      cx.save(); cx.translate(b.x, b.y); cx.rotate(b.a); cx.fillStyle = b.c; cx.fillRect(-b.s / 2, -b.s / 4, b.s, b.s / 2); cx.restore();
+    });
+    if (bits.length) requestAnimationFrame(frame); else { running = false; cx.clearRect(0, 0, cc.width, cc.height); }
+  }
+})();
+</script>
+</body>
 </html>
