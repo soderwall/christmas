@@ -475,8 +475,10 @@
     au.volume = .45;
     function sync() { var on = !au.paused; btn.textContent = on ? '🔊' : '🔇'; btn.classList.toggle('on', on); }
     au.addEventListener('play', sync); au.addEventListener('pause', sync);
+    // Show the button right away (iPhone doesn't preload audio, so 'canplay' may never fire before a tap).
+    btn.classList.add('ready');
+    au.addEventListener('error', function () { btn.classList.remove('ready'); });
     au.addEventListener('canplay', function () {
-      btn.classList.add('ready');
       if (!want || started) return;
       var p = au.play();   // works if the browser allows autoplay; otherwise we wait for a gesture
       if (p && p.then) p.then(function () { started = true; sync(); }, function () {});
